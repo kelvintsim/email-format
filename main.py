@@ -4,9 +4,6 @@ from langchain.chat_models import AzureChatOpenAI
 from langchain.schema import HumanMessage
 import openai
 import os
-from dotenv import load_dotenv
-
-load_dotenv()
 
 template = """
     Below is an email that may be poorly worded.
