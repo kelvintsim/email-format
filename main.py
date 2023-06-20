@@ -67,12 +67,6 @@ with col2:
 
 st.markdown("## Enter Your Email To Convert")
 
-def get_api_key():
-    input_text = st.text_input(label="OpenAI API Key ",  placeholder="Ex: sk-2twmA8tfCb8un4...", key="openai_api_key_input")
-    return input_text
-
-openai_api_key = get_api_key()
-
 col1, col2 = st.columns(2)
 with col1:
     option_tone = st.selectbox(
@@ -103,10 +97,6 @@ st.button("*See An Example*", type='secondary', help="Click to see an example of
 st.markdown("### Your Converted Email:")
 
 if email_input:
-    # if not openai_api_key:
-    #     st.warning('Please insert OpenAI API Key. Instructions [here](https://help.openai.com/en/articles/4936850-where-do-i-find-my-secret-api-key)', icon="⚠️")
-    #     st.stop()
-
     llm = load_LLM()
 
     prompt_with_email = chat_with_model(llm, option_tone, option_dialect, email_input)
