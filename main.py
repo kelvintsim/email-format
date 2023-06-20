@@ -1,6 +1,12 @@
 import streamlit as st
-from langchain import PromptTemplate
-from langchain.llms import OpenAI
+from langchain import PromptTemplate, LLMChain
+from langchain.chat_models import AzureChatOpenAI
+from langchain.schema import HumanMessage
+import openai
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 template = """
     Below is an email that may be poorly worded.
@@ -31,16 +37,22 @@ template = """
     YOUR {dialect} RESPONSE:
 """
 
-prompt = PromptTemplate(
-    input_variables=["tone", "dialect", "email"],
-    template=template,
-)
-
-def load_LLM(openai_api_key):
+# prompt = PromptTemplate(
+#     input_variables=["tone", "dialect", "email"],
+#     template=template,
+# )
+def chat_with_model(llm, tone, dialect, email):
+    prompt = PromptTemplate(template=template, input_variables=["tone", "dialect", "email"])
+    chain = LLMChain(llm=llm, prompt=prompt, verbose=True)
+    response = chain.run(tone=tone, dialect=dialect, email=email)
+    return response
+    
+def load_LLM():
     """Logic for loading the chain you want to use should go here."""
     # Make sure your openai_api_key is set as an environment variable
-    llm = OpenAI(temperature=.7, openai_api_key=openai_api_key)
+    llm = AzureChatOpenAI(deployment_name = os.environ.get("DEPLOYMENT_NAME"))
     return llm
+
 
 st.set_page_config(page_title="Globalize Email", page_icon=":robot:")
 st.header("Globalize Text")
@@ -94,14 +106,12 @@ st.button("*See An Example*", type='secondary', help="Click to see an example of
 st.markdown("### Your Converted Email:")
 
 if email_input:
-    if not openai_api_key:
-        st.warning('Please insert OpenAI API Key. Instructions [here](https://help.openai.com/en/articles/4936850-where-do-i-find-my-secret-api-key)', icon="⚠️")
-        st.stop()
+    # if not openai_api_key:
+    #     st.warning('Please insert OpenAI API Key. Instructions [here](https://help.openai.com/en/articles/4936850-where-do-i-find-my-secret-api-key)', icon="⚠️")
+    #     st.stop()
 
-    llm = load_LLM(openai_api_key=openai_api_key)
+    llm = load_LLM()
 
-    prompt_with_email = prompt.format(tone=option_tone, dialect=option_dialect, email=email_input)
+    prompt_with_email = chat_with_model(llm, option_tone, option_dialect, email_input)
 
-    formatted_email = llm(prompt_with_email)
-
-    st.write(formatted_email)
+    st.write(prompt_with_email)
